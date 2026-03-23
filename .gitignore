@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+client/build/
+server/dist/
+
+# Runtime data files (games are ephemeral; templates are seeded by code)
+server/data/games/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
