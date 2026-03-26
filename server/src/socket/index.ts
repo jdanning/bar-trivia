@@ -6,19 +6,59 @@ import { ClientToServerEvents, ServerToClientEvents } from '../types';
 
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
+// Strip HTML tags and trim to a maximum length
+function sanitize(value: unknown, maxLen: number): string {
+  if (typeof value !== 'string') return '';
+  return value.replace(/<[^>]*>/g, '').trim().substring(0, maxLen);
+}
+
 export function registerSocketHandlers(io: Server<ClientToServerEvents, ServerToClientEvents>) {
+
+  function killGame(gameId: string) {
+    console.log(`[killGame] Killing game ${gameId}`);
+    gameStore.updateGame(gameId, { status: 'finished' });
+    io.to(`game:${gameId}`).emit('game:killed');
+    const room = io.sockets.adapter.rooms.get(`game:${gameId}`);
+    if (room) {
+      for (const sid of Array.from(room)) {
+        const s = io.sockets.sockets.get(sid);
+        if (s) {
+          s.leave(`game:${gameId}`);
+          s.leave(`host:${gameId}`);
+        }
+      }
+    }
+  }
+
   io.on('connection', (socket: AppSocket) => {
     console.log(`Socket connected: ${socket.id}`);
 
     // ---- GAME MANAGEMENT ----
 
     socket.on('game:create', async (templateId, callback) => {
+      // Kill any existing game this host socket owns (same socket session)
+      const existing = gameStore.getGameByHost(socket.id);
+      console.log(`[game:create] host=${socket.id}, existing=${existing?.id ?? 'none'}`);
+      if (existing) {
+        killGame(existing.id);
+      }
+
       const game = gameStore.createGame(templateId || undefined);
       const qrCode = await generateQRCode(game.code);
       socket.join(`game:${game.id}`);
       socket.join(`host:${game.id}`);
       gameStore.updateGame(game.id, { hostSocketId: socket.id });
       callback({ ...game, qrCode } as any);
+    });
+
+    socket.on('game:abandon', (gameId) => {
+      console.log(`[game:abandon] gameId=${gameId}`);
+      const game = gameStore.getGame(gameId);
+      if (!game || game.status === 'finished') {
+        console.log(`[game:abandon] skipped: game ${game ? 'already finished' : 'not found'}`);
+        return;
+      }
+      killGame(gameId);
     });
 
     socket.on('host:join', (gameId) => {
@@ -48,7 +88,12 @@ export function registerSocketHandlers(io: Server<ClientToServerEvents, ServerTo
         return;
       }
 
-      const player = gameStore.addPlayer(game.id, data.teamName, socket.id);
+      const teamName = sanitize(data.teamName, 50);
+      if (!teamName) {
+        callback({ success: false, error: 'Team name is required.' });
+        return;
+      }
+      const player = gameStore.addPlayer(game.id, teamName, socket.id);
       if (!player) {
         callback({ success: false, error: 'Team name already taken and currently connected.' });
         return;
@@ -67,9 +112,16 @@ export function registerSocketHandlers(io: Server<ClientToServerEvents, ServerTo
     socket.on('game:rejoin', (data, callback) => {
       const game = gameStore.getGame(data.gameId);
       if (!game) {
+        console.log(`[rejoin] Game ${data.gameId} not found — rejecting`);
         callback({ success: false, error: 'Game not found.' });
         return;
       }
+      if (game.status === 'finished') {
+        console.log(`[rejoin] Game ${data.gameId} is finished — rejecting player ${data.playerId}`);
+        callback({ success: false, error: 'This game has ended.' });
+        return;
+      }
+      console.log(`[rejoin] Player ${data.playerId} rejoining game ${data.gameId} (status: ${game.status})`);
 
       const player = gameStore.rejoinPlayer(game.id, data.playerId, socket.id);
       if (!player) {
@@ -112,8 +164,16 @@ export function registerSocketHandlers(io: Server<ClientToServerEvents, ServerTo
     // ---- QUESTIONS ----
 
     socket.on('question:add', (data, callback) => {
+      const game = gameStore.getGame(data.gameId);
+      if (!game || game.hostSocketId !== socket.id) return;
+
       const question = gameStore.addQuestion(
-        data.gameId, data.roundNumber, data.questionNumber, data.category, data.text, data.answer
+        data.gameId,
+        data.roundNumber,
+        data.questionNumber,
+        sanitize(data.category, 100),
+        sanitize(data.text, 500),
+        sanitize(data.answer, 200),
       );
       if (question) {
         callback(question);
@@ -122,7 +182,16 @@ export function registerSocketHandlers(io: Server<ClientToServerEvents, ServerTo
     });
 
     socket.on('question:update', (data, callback) => {
-      const question = gameStore.updateQuestion(data.gameId, data.questionId, data.category, data.text, data.answer);
+      const game = gameStore.getGame(data.gameId);
+      if (!game || game.hostSocketId !== socket.id) return;
+
+      const question = gameStore.updateQuestion(
+        data.gameId,
+        data.questionId,
+        sanitize(data.category, 100),
+        sanitize(data.text, 500),
+        sanitize(data.answer, 200),
+      );
       if (question) {
         callback(question);
         emitGameState(io, data.gameId);
@@ -204,7 +273,7 @@ export function registerSocketHandlers(io: Server<ClientToServerEvents, ServerTo
     socket.on('answer:submit', (data, callback) => {
       const result = gameStore.submitAnswer(
         data.gameId, data.playerId, data.questionId,
-        data.text, data.wager, data.roundNumber, data.questionNumber
+        sanitize(data.text, 200), data.wager, data.roundNumber, data.questionNumber
       );
       callback(result);
 

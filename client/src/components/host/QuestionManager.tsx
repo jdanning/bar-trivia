@@ -95,6 +95,7 @@ export default function QuestionManager() {
             value={categoryText}
             onChange={(e) => setCategoryText(e.target.value)}
             placeholder="e.g. Science, History, Sports..."
+            maxLength={100}
           />
         </div>
         <div className="form-group">
@@ -104,6 +105,7 @@ export default function QuestionManager() {
             onChange={(e) => setQuestionText(e.target.value)}
             placeholder="Enter the trivia question..."
             rows={3}
+            maxLength={500}
           />
         </div>
         <div className="form-group">
@@ -113,6 +115,7 @@ export default function QuestionManager() {
             value={answerText}
             onChange={(e) => setAnswerText(e.target.value)}
             placeholder="Enter the correct answer..."
+            maxLength={200}
           />
         </div>
         <button className="btn btn-primary" onClick={handleSaveQuestion}>

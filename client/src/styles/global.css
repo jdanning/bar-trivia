@@ -82,6 +82,13 @@ p { line-height: 1.6; }
   background: var(--green);
 }
 
+.btn-done {
+  background: var(--bg-card);
+  border: 1px solid var(--green);
+  color: var(--green);
+  opacity: 0.6;
+}
+
 .btn-warning {
   background: var(--yellow);
   color: #1a1a2e;
@@ -402,6 +409,13 @@ p { line-height: 1.6; }
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--border);
+}
+
+.stopwatch {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: var(--yellow);
+  margin-bottom: 6px;
 }
 
 .round-actions, .navigation-controls {

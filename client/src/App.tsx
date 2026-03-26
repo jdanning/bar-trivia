@@ -1,30 +1,58 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, useParams, Link } from 'react-router-dom';
+import React, { useRef, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useParams, useNavigate, Link } from 'react-router-dom';
 import { GameProvider } from './context/GameContext';
 import HostDashboard from './components/host/HostDashboard';
 import PlayerJoin from './components/player/PlayerJoin';
 import PlayerDashboard from './components/player/PlayerDashboard';
 import { useGameContext } from './context/GameContext';
+import { clearSession } from './hooks/useSocket';
 import './styles/global.css';
 
+function GameKilledScreen() {
+  const { dispatch } = useGameContext();
+  const navigate = useNavigate();
+  return (
+    <div className="player-dashboard">
+      <h1>🍺 Bar Trivia</h1>
+      <h2>Game Ended</h2>
+      <p>The host has started a new game. You'll need to rejoin.</p>
+      <button className="btn btn-primary btn-large" onClick={() => {
+        dispatch({ type: 'DISMISS_KILLED' });
+        navigate('/play', { replace: true });
+      }}>
+        Back to Join
+      </button>
+    </div>
+  );
+}
+
 function PlayerPage() {
-  const { game, player } = useGameContext();
+  const { game, player, gameKilled } = useGameContext();
 
-  if (game && player) {
-    return <PlayerDashboard />;
-  }
-
+  if (gameKilled) return <GameKilledScreen />;
+  if (game && player) return <PlayerDashboard />;
   return <PlayerJoin />;
 }
 
 function JoinWithCode() {
   const { code } = useParams<{ code: string }>();
-  const { game, player } = useGameContext();
+  const { game, player, gameKilled, dispatch } = useGameContext();
+  const prevCodeRef = useRef(code);
 
-  if (game && player) {
-    return <PlayerDashboard />;
-  }
+  // Only reset when the URL code actually changes (player scanned a new QR),
+  // not when the game code changes from joining via the form.
+  useEffect(() => {
+    if (code !== prevCodeRef.current) {
+      prevCodeRef.current = code;
+      if (game && player && game.code !== code?.toUpperCase()) {
+        clearSession();
+        dispatch({ type: 'RESET' });
+      }
+    }
+  }, [code, game, player, dispatch]);
 
+  if (gameKilled) return <GameKilledScreen />;
+  if (game && player) return <PlayerDashboard />;
   return <PlayerJoin initialCode={code} />;
 }
 

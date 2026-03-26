@@ -10,7 +10,19 @@ const server = http.createServer(app);
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: {
-    origin: (_origin, callback) => callback(null, true),
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      try {
+        const { hostname } = new URL(origin);
+        if (hostname === 'localhost' || hostname === '127.0.0.1') return callback(null, true);
+        if (hostname === config.localIp) return callback(null, true);
+        if (config.publicUrl) {
+          const tunnelHost = new URL(config.publicUrl).hostname;
+          if (hostname === tunnelHost) return callback(null, true);
+        }
+      } catch { /* malformed origin */ }
+      callback(new Error('CORS: origin not permitted'));
+    },
     methods: ['GET', 'POST'],
   },
 });

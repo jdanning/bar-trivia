@@ -263,6 +263,13 @@ class GameStore {
     return null;
   }
 
+  getGameByHost(socketId: string): IGame | null {
+    for (const game of this.games.values()) {
+      if (game.hostSocketId === socketId && game.status !== 'finished') return game;
+    }
+    return null;
+  }
+
   updateGame(id: string, updates: Partial<IGame>): IGame | null {
     const game = this.games.get(id);
     if (!game) return null;
@@ -400,6 +407,14 @@ class GameStore {
   submitAnswer(gameId: string, playerId: string, questionId: string, text: string, wager: number, roundNumber: number, questionNumber: number): { success: boolean; error?: string } {
     const game = this.games.get(gameId);
     if (!game) return { success: false, error: 'Game not found' };
+
+    if (game.status !== 'active') {
+      return { success: false, error: 'Game is not active' };
+    }
+
+    if (!game.questionRevealed) {
+      return { success: false, error: 'Answers are closed for this question' };
+    }
 
     const validWagers = config.getWagersForRound(roundNumber);
     if (!validWagers.includes(wager)) {

@@ -8,6 +8,8 @@ interface GameState {
   scoreboard: IScoreboard[];
   currentRevealedQuestion: { id: string; text: string; roundNumber: number; questionNumber: number } | null;
   questionClosed: boolean;
+  showLeaderboard: boolean;
+  gameKilled: boolean;
 }
 
 type GameAction =
@@ -17,6 +19,9 @@ type GameAction =
   | { type: 'SET_SCOREBOARD'; payload: IScoreboard[] }
   | { type: 'REVEAL_QUESTION'; payload: { id: string; text: string; roundNumber: number; questionNumber: number } }
   | { type: 'CLOSE_QUESTION' }
+  | { type: 'ROUND_COMPLETED' }
+  | { type: 'GAME_KILLED' }
+  | { type: 'DISMISS_KILLED' }
   | { type: 'PLAYER_JOINED'; payload: IPlayer }
   | { type: 'PLAYER_LEFT'; payload: string }
   | { type: 'RESET' };
@@ -28,6 +33,8 @@ const initialState: GameState = {
   scoreboard: [],
   currentRevealedQuestion: null,
   questionClosed: false,
+  showLeaderboard: false,
+  gameKilled: false,
 };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -48,7 +55,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       } else if (!g.questionRevealed && revealed) {
         closed = true;
       }
-      return { ...state, game: g, currentRevealedQuestion: revealed, questionClosed: closed };
+      // Dismiss the between-round leaderboard when the host starts the next round
+      const roundAdvanced = state.game !== null && g.currentRound > state.game.currentRound;
+      return {
+        ...state,
+        game: g,
+        currentRevealedQuestion: revealed,
+        questionClosed: closed,
+        showLeaderboard: roundAdvanced ? false : state.showLeaderboard,
+      };
     }
     case 'SET_PLAYER':
       return { ...state, player: action.payload };
@@ -60,6 +75,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, currentRevealedQuestion: action.payload, questionClosed: false };
     case 'CLOSE_QUESTION':
       return { ...state, questionClosed: true };
+    case 'ROUND_COMPLETED':
+      return { ...state, showLeaderboard: true };
+    case 'GAME_KILLED':
+      return { ...initialState, gameKilled: true };
+    case 'DISMISS_KILLED':
+      return { ...state, gameKilled: false };
     case 'PLAYER_JOINED':
       if (!state.game) return state;
       return {

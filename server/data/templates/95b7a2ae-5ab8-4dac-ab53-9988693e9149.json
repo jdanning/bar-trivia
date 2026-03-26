@@ -1,0 +1,145 @@
+{
+  "id": "95b7a2ae-5ab8-4dac-ab53-9988693e9149",
+  "name": "Pub Night Vol. 1",
+  "rounds": [
+    {
+      "roundNumber": 1,
+      "questions": [
+        {
+          "questionNumber": 1,
+          "category": "Pop Culture",
+          "text": "What is the name of the fictional kingdom in Disney's 'Frozen'?",
+          "answer": "Arendelle"
+        },
+        {
+          "questionNumber": 2,
+          "category": "Sports",
+          "text": "How many players are on a standard soccer team on the field at one time?",
+          "answer": "11"
+        },
+        {
+          "questionNumber": 3,
+          "category": "Food & Drink",
+          "text": "What country does pizza originate from?",
+          "answer": "Italy"
+        }
+      ]
+    },
+    {
+      "roundNumber": 2,
+      "questions": [
+        {
+          "questionNumber": 1,
+          "category": "Science",
+          "text": "What planet is closest in size to Earth?",
+          "answer": "Venus"
+        },
+        {
+          "questionNumber": 2,
+          "category": "History",
+          "text": "In what decade did the Berlin Wall fall?",
+          "answer": "1980s"
+        },
+        {
+          "questionNumber": 3,
+          "category": "Music",
+          "text": "Which band released the album 'Abbey Road' in 1969?",
+          "answer": "The Beatles"
+        }
+      ]
+    },
+    {
+      "roundNumber": 3,
+      "questions": [
+        {
+          "questionNumber": 1,
+          "category": "Geography",
+          "text": "What is the only country in the world that is also a continent?",
+          "answer": "Australia"
+        },
+        {
+          "questionNumber": 2,
+          "category": "Literature",
+          "text": "In Shakespeare's 'Hamlet', what is the name of Hamlet's father's ghost?",
+          "answer": "King Hamlet (accept: Hamlet's father)"
+        },
+        {
+          "questionNumber": 3,
+          "category": "Science",
+          "text": "What is the powerhouse of the cell?",
+          "answer": "Mitochondria"
+        }
+      ]
+    },
+    {
+      "roundNumber": 4,
+      "questions": [
+        {
+          "questionNumber": 1,
+          "category": "History",
+          "text": "What ancient wonder was located in Alexandria, Egypt?",
+          "answer": "The Lighthouse of Alexandria"
+        },
+        {
+          "questionNumber": 2,
+          "category": "Science",
+          "text": "What is the chemical formula for table salt?",
+          "answer": "NaCl"
+        },
+        {
+          "questionNumber": 3,
+          "category": "Music",
+          "text": "What instrument does Yo-Yo Ma famously play?",
+          "answer": "Cello"
+        }
+      ]
+    },
+    {
+      "roundNumber": 5,
+      "questions": [
+        {
+          "questionNumber": 1,
+          "category": "Geography",
+          "text": "What is the capital city of Kazakhstan?",
+          "answer": "Astana"
+        },
+        {
+          "questionNumber": 2,
+          "category": "History",
+          "text": "What year did the United States officially enter World War I?",
+          "answer": "1917"
+        },
+        {
+          "questionNumber": 3,
+          "category": "Science",
+          "text": "What is the half-life of Carbon-14 (to the nearest thousand years)?",
+          "answer": "5,730 years (accept: 5700 or 6000)"
+        }
+      ]
+    },
+    {
+      "roundNumber": 6,
+      "questions": [
+        {
+          "questionNumber": 1,
+          "category": "Language",
+          "text": "In linguistics, what term describes a word that means the opposite of another word?",
+          "answer": "Antonym"
+        },
+        {
+          "questionNumber": 2,
+          "category": "History",
+          "text": "What was the name of the treaty that ended the Thirty Years' War in 1648?",
+          "answer": "Peace of Westphalia"
+        },
+        {
+          "questionNumber": 3,
+          "category": "Science",
+          "text": "What is the Schwarzschild radius of an object — in plain language, what does it define?",
+          "answer": "The radius at which an object becomes a black hole (event horizon)"
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-03-25T00:00:00.000Z"
+}

@@ -73,6 +73,7 @@ export interface ServerToClientEvents {
   'scores:updated': (scoreboard: IScoreboard[]) => void;
   'player:joined': (player: IPlayer) => void;
   'player:left': (playerId: string) => void;
+  'game:killed': () => void;
   'error': (message: string) => void;
 }
 
@@ -92,4 +93,5 @@ export interface ClientToServerEvents {
   'answer:score': (data: { gameId: string; playerId: string; questionId: string; isCorrect: boolean }, callback: (result: { success: boolean }) => void) => void;
   'round:complete': (data: { gameId: string; roundNumber: number }) => void;
   'game:finish': (gameId: string) => void;
+  'game:abandon': (gameId: string) => void;
 }

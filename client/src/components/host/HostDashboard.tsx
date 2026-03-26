@@ -77,6 +77,11 @@ export default function HostDashboard() {
   }, []);
 
   const createGame = useCallback(() => {
+    // Kill the old game — check both in-memory state and localStorage
+    const oldGameId = game?.id || loadHostSession();
+    if (oldGameId) {
+      emit('game:abandon' as any, oldGameId);
+    }
     clearHostSession();
     setSavedGame(null);
     emit('game:create', selectedTemplate || undefined, (newGame: IGame & { qrCode?: string }) => {
@@ -85,7 +90,7 @@ export default function HostDashboard() {
       saveHostSession(newGame.id);
       if (newGame.qrCode) setQrCode(newGame.qrCode);
     });
-  }, [emit, dispatch, selectedTemplate]);
+  }, [emit, dispatch, selectedTemplate, game?.id]);
 
   const continueGame = useCallback(() => {
     if (!savedGame) return;
@@ -136,7 +141,11 @@ export default function HostDashboard() {
             </p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button className="btn btn-primary" onClick={continueGame}>Continue Game</button>
-              <button className="btn" onClick={() => { clearHostSession(); setSavedGame(null); }}>Start Fresh</button>
+              <button className="btn" onClick={() => {
+                emit('game:abandon' as any, savedGame.id);
+                clearHostSession();
+                setSavedGame(null);
+              }}>Start Fresh</button>
             </div>
           </div>
         )}

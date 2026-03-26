@@ -51,10 +51,19 @@ export function useSocket() {
       dispatch({ type: 'SET_SCOREBOARD', payload: scoreboard });
     });
 
+    socket.on('round:completed', () => {
+      dispatch({ type: 'ROUND_COMPLETED' });
+    });
+
     socket.on('game:finished', (scoreboard: IScoreboard[]) => {
       dispatch({ type: 'SET_SCOREBOARD', payload: scoreboard });
       clearSession();
       try { localStorage.removeItem('trivia_host_session'); } catch {}
+    });
+
+    socket.on('game:killed', () => {
+      clearSession();
+      dispatch({ type: 'GAME_KILLED' });
     });
 
     // Auto-rejoin on reconnect (covers tab switch, phone lock, brief network drops)
@@ -86,7 +95,9 @@ export function useSocket() {
       socket.off('question:revealed');
       socket.off('question:closed');
       socket.off('scores:updated');
+      socket.off('round:completed');
       socket.off('game:finished');
+      socket.off('game:killed');
       socket.off('connect', handleConnect);
     };
   }, [dispatch]);

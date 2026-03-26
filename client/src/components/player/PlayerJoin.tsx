@@ -64,7 +64,7 @@ export default function PlayerJoin({ initialCode }: PlayerJoinProps) {
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
           placeholder="Enter your team name"
-          maxLength={30}
+          maxLength={50}
         />
       </div>
 
