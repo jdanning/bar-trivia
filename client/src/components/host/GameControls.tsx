@@ -38,9 +38,8 @@ export default function GameControls() {
   // Determine how far the host has progressed through the current round's questions.
   // A question is "done" once it has been revealed AND its answers have been closed.
   const totalQuestions = currentRound?.questions.length ?? 0;
-  const allQuestionsDone =
-    totalQuestions > 0 && game.currentQuestion >= totalQuestions && !game.questionRevealed;
-  const nextQuestionNum = game.questionRevealed ? null : game.currentQuestion + 1;
+  const allQuestionsDone = totalQuestions > 0 && game.currentQuestion >= totalQuestions;
+  const nextQuestionNum = game.currentQuestion + 1;
 
   const handleStartGame = () => {
     emit('game:start', game.id);
@@ -48,10 +47,6 @@ export default function GameControls() {
 
   const handleRevealQuestion = (roundNumber: number, questionNumber: number) => {
     emit('question:reveal', { gameId: game.id, roundNumber, questionNumber });
-  };
-
-  const handleCloseQuestion = () => {
-    emit('question:close', { gameId: game.id });
   };
 
   const handleStartRound = (roundNumber: number) => {
@@ -103,10 +98,8 @@ export default function GameControls() {
               .sort((a, b) => a.questionNumber - b.questionNumber)
               .map((q) => {
                 const isActive = game.questionRevealed && game.currentQuestion === q.questionNumber;
-                const isDone =
-                  (game.currentQuestion > 0 && q.questionNumber < game.currentQuestion) ||
-                  (q.questionNumber === game.currentQuestion && !game.questionRevealed && game.currentQuestion > 0);
-                const isNext = !game.questionRevealed && q.questionNumber === nextQuestionNum;
+                const isDone = game.currentQuestion > 0 && q.questionNumber < game.currentQuestion;
+                const isNext = q.questionNumber === nextQuestionNum;
                 const isEnabled = isActive || isNext;
 
                 return (
@@ -123,9 +116,6 @@ export default function GameControls() {
                         <p className="stopwatch"><strong>Time on this Question:</strong> {formatTime(elapsed)}</p>
                         <p className="question-text"><strong>Q:</strong> {q.text}</p>
                         <p className="answer-text"><strong>A:</strong> {q.answer}</p>
-                        <button className="btn btn-warning" onClick={handleCloseQuestion}>
-                          Close Answers
-                        </button>
                       </div>
                     )}
                   </div>

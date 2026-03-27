@@ -412,8 +412,18 @@ class GameStore {
       return { success: false, error: 'Game is not active' };
     }
 
-    if (!game.questionRevealed) {
-      return { success: false, error: 'Answers are closed for this question' };
+    // Allow answers for any previously revealed question in the current round
+    if (roundNumber !== game.currentRound) {
+      return { success: false, error: 'Cannot answer questions from a different round' };
+    }
+
+    const currentRound = game.rounds.find(r => r.roundNumber === game.currentRound);
+    if (!currentRound || currentRound.status !== 'active') {
+      return { success: false, error: 'This round is not active' };
+    }
+
+    if (questionNumber > game.currentQuestion) {
+      return { success: false, error: 'This question has not been revealed yet' };
     }
 
     const validWagers = config.getWagersForRound(roundNumber);
